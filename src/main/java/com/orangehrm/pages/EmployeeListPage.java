@@ -9,28 +9,37 @@ public class EmployeeListPage {
     private WebDriver driver;
     private WaitHelper waitHelper;
 
-    private By firstNameField = By.name("firstName");
-    private By lastNameField = By.name("lastName");
-    private By employeeIdField =
-            By.xpath("//label[normalize-space()='Employee Id']/following::input[1]");
+    private By employeeIdSearchField =
+            By.xpath("//label[normalize-space()='Employee Id']/../following-sibling::div/input");
+
+    private By searchButton =
+            By.xpath("//button[normalize-space()='Search']");
+
+    private By employeeTable =
+            By.cssSelector("div.oxd-table-body");
 
     public EmployeeListPage(WebDriver driver) {
         this.driver = driver;
         this.waitHelper = new WaitHelper(driver);
     }
 
-    public String getFirstName() {
-        return waitHelper.waitForVisibility(firstNameField)
-                .getAttribute("value");
+    public void enterEmployeeId(String employeeId) {
+        waitHelper.waitForVisibility(employeeIdSearchField)
+                .sendKeys(employeeId);
     }
 
-    public String getLastName() {
-        return waitHelper.waitForVisibility(lastNameField)
-                .getAttribute("value");
+    public void clickSearch() {
+        waitHelper.waitForClickable(searchButton).click();
     }
 
-    public String getEmployeeId() {
-        return waitHelper.waitForVisibility(employeeIdField)
-                .getAttribute("value");
+    public boolean isEmployeeFound() {
+
+        try {
+            waitHelper.waitForVisibility(employeeTable);
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
