@@ -45,7 +45,7 @@ public class EmployeeTest extends BaseTest {
                 "Dashboard is not displayed after login"
         );
 
-        // Navigate to PIM > Add Employee
+        // Navigate to Add Employee
         PIMPage pimPage =
                 new PIMPage(driver);
 
@@ -68,6 +68,12 @@ public class EmployeeTest extends BaseTest {
         String employeeId =
                 employeeData.get("employeeId").asString();
 
+        String jobTitle =
+                employeeData.get("jobTitle").asString();
+
+        String employmentStatus =
+                employeeData.get("employmentStatus").asString();
+
         // Profile picture path
         String profilePicturePath =
                 new File(
@@ -78,16 +84,18 @@ public class EmployeeTest extends BaseTest {
         AddEmployeePage addEmployeePage =
                 new AddEmployeePage(driver);
 
-        boolean employeeCreated =
-                addEmployeePage.addEmployee(
-                        firstName,
-                        lastName,
-                        employeeId,
-                        profilePicturePath
-                );
+        addEmployeePage.enterFirstName(firstName);
 
-        // Handle duplicate Employee ID
-        if (!employeeCreated) {
+        addEmployeePage.enterLastName(lastName);
+
+        addEmployeePage.enterEmployeeId(employeeId);
+
+        // Check duplicate Employee ID
+        if (addEmployeePage.isDuplicateEmployeeIdDisplayed()) {
+
+            System.out.println(
+                    "Employee ID already exists: " + employeeId
+            );
 
             System.out.println(
                     "Employee creation stopped because Employee ID "
@@ -98,57 +106,117 @@ public class EmployeeTest extends BaseTest {
             return;
         }
 
-        // Wait for Employee Details page
+        // Upload profile picture
+        addEmployeePage.uploadProfilePicture(
+                profilePicturePath
+        );
+
+        // Save Employee
+        addEmployeePage.clickSave();
+
+        // Verify Employee Details page
         EmployeeDetailsPage employeeDetailsPage =
                 new EmployeeDetailsPage(driver);
 
         employeeDetailsPage.waitForEmployeeDetailsPage();
 
+        // Update Job Details
+        employeeDetailsPage.updateJobDetails(
+                jobTitle,
+                employmentStatus
+        );
+
+        // Verify Job Title
+        Assert.assertEquals(
+                employeeDetailsPage.getJobTitle(),
+                jobTitle,
+                "Job Title was not updated correctly"
+        );
+
+        // Verify Employment Status
+        Assert.assertEquals(
+                employeeDetailsPage.getEmploymentStatus(),
+                employmentStatus,
+                "Employment Status was not updated correctly"
+        );
+
+        System.out.println(
+                "Employee Job Details updated successfully."
+        );
+
         // Navigate to Employee List
         employeeDetailsPage.clickEmployeeList();
 
-        // Search employee by Employee ID
         EmployeeListPage employeeListPage =
                 new EmployeeListPage(driver);
 
+        // Search Employee
         employeeListPage.enterEmployeeId(employeeId);
 
         employeeListPage.clickSearch();
 
-        // Temporary pause for visual verification
-        Thread.sleep(5000);
+        // Verify Employee exists before deletion
+        Assert.assertTrue(
+                employeeListPage.isEmployeeFound(employeeId),
+                "Employee was not found before deletion. "
+                        + "Employee ID: " + employeeId
+        );
 
-        // Verify employee
-        boolean employeeFound =
-                employeeListPage.isEmployeeFound();
+        // Delete Employee
+        employeeListPage.clickDelete();
 
-        if (employeeFound) {
+        employeeListPage.confirmDelete();
 
-            System.out.println(
-                    "Employee found successfully: "
-                            + firstName
-                            + " "
-                            + lastName
-                            + " | Employee ID: "
-                            + employeeId
-            );
+        // Search again after deletion
+        employeeListPage.clickSearch();
 
-        } else {
+        // Verify Employee no longer exists
+        Assert.assertFalse(
+                employeeListPage.isEmployeeFound(employeeId),
+                "Employee still exists after deletion. "
+                        + "Employee ID: " + employeeId
+        );
 
-            System.out.println(
-                    "Employee not found: "
-                            + firstName
-                            + " "
-                            + lastName
-                            + " | Employee ID: "
-                            + employeeId
-            );
-        }
+        System.out.println(
+                "Employee deleted successfully: "
+                        + employeeId
+        );
+
+        // Logout
+        dashboardPage =
+                new DashboardPage(driver);
+
+        dashboardPage.logout();
+
+        // Verify Login page is displayed
+        LoginPage logoutLoginPage =
+                new LoginPage(driver);
 
         Assert.assertTrue(
-                employeeFound,
-                "Employee was not found in Employee List. Employee ID: "
-                        + employeeId
+                logoutLoginPage.isLoginPageDisplayed(),
+                "Login page is not displayed after logout"
+        );
+
+        System.out.println(
+                "Logout successful. Login page is displayed."
+        );
+
+        // Verify Session Invalidation
+        driver.get(
+                PropertiesReader.getProperty("url")
+                        + "web/index.php/dashboard/index"
+        );
+
+        LoginPage sessionLoginPage =
+                new LoginPage(driver);
+
+        Assert.assertTrue(
+                sessionLoginPage.isLoginPageDisplayed(),
+                "Session is still active after logout"
+        );
+
+        System.out.println(
+                "Session invalidated successfully."
         );
     }
 }

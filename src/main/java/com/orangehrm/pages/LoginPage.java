@@ -19,15 +19,18 @@ public class LoginPage {
     }
 
     public void enterUsername(String username) {
-        waitHelper.waitForVisibility(usernameField).sendKeys(username);
+        waitHelper.waitForVisibility(usernameField)
+                .sendKeys(username);
     }
 
     public void enterPassword(String password) {
-        waitHelper.waitForVisibility(passwordField).sendKeys(password);
+        waitHelper.waitForVisibility(passwordField)
+                .sendKeys(password);
     }
 
     public void clickLogin() {
-        waitHelper.waitForClickable(loginButton).click();
+        waitHelper.waitForClickable(loginButton)
+                .click();
     }
 
     public void login(String username, String password) {
@@ -35,5 +38,12 @@ public class LoginPage {
         enterPassword(password);
         clickLogin();
     }
+
+    public boolean isLoginPageDisplayed() {
+        return waitHelper
+                .waitForVisibility(usernameField)
+                .isDisplayed();
+    }
+
 }
 

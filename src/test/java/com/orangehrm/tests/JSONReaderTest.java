@@ -10,7 +10,7 @@ public class JSONReaderTest {
     @Test
     public void verifyJsonData() throws JacksonException {
 
-        String filePath = "src/test/resources/test_data/Employee.json";
+        String filePath = "src/test/resources/test-data/Employee.json";
 
         JsonNode  employeeData = JsonReader.readJsonFile(filePath);
 

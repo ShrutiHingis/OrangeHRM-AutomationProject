@@ -9,7 +9,14 @@ public class DashboardPage {
     private WebDriver driver;
     private WaitHelper waitHelper;
 
-    private By dashboardHeading = By.xpath("//h6[normalize-space()='Dashboard']");
+    private By dashboardHeading =
+            By.xpath("//h6[normalize-space()='Dashboard']");
+
+    private By profileMenu =
+            By.cssSelector("span.oxd-userdropdown-tab");
+
+    private By logoutLink =
+            By.xpath("//a[normalize-space()='Logout']");
 
     public DashboardPage(WebDriver driver) {
         this.driver = driver;
@@ -17,7 +24,24 @@ public class DashboardPage {
     }
 
     public boolean isDashboardDisplayed() {
-        return waitHelper.waitForVisibility(dashboardHeading).isDisplayed();
+        return waitHelper
+                .waitForVisibility(dashboardHeading)
+                .isDisplayed();
+    }
+
+    public void clickProfileMenu() {
+        waitHelper.waitForClickable(profileMenu)
+                .click();
+    }
+
+    public void clickLogout() {
+        waitHelper.waitForClickable(logoutLink)
+                .click();
+    }
+
+    public void logout() {
+        clickProfileMenu();
+        clickLogout();
     }
 }
 
